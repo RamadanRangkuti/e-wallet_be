@@ -22,6 +22,8 @@ app.use(cors());
 const logger = morgan("dev");
 app.use(logger);
 
+app.use(express.static("./public/images"));
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Tes");
 })
