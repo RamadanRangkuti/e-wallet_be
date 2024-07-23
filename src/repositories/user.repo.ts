@@ -65,7 +65,7 @@ export const getTotalUser = async (): Promise<{ rows: { total_user: string }[] }
 };
 
 export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {
-  let query = `SELECT fullname, email, phone, image, password, pin FROM users WHERE id=$1`;
+  let query = `SELECT fullname, email, balance, phone, image, password, pin FROM users WHERE id=$1`;
   const value = [id];
   return db.query(query, value);
 };
