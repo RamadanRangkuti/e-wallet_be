@@ -128,21 +128,36 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
   // Get balance for the last 7 days
 export const getBalanceForLast7Days = (id: number): Promise<QueryResult<any>> => {
     const query = `
-        SELECT
-            date_trunc('day', t.created_at) AS date,
-            SUM(CASE 
-                WHEN t.type = 'Transfer' AND tr.receiver_id = $1 THEN tr.amount 
-                WHEN t.type = 'Topup' AND tp.user_id = $1 THEN tp.total_amount
-                ELSE 0 
-            END) AS balance_in,
-            SUM(CASE WHEN t.type = 'Transfer' AND tr.sender_id = $1 THEN tr.amount ELSE 0 END) AS balance_out
-        FROM transactions t
-        LEFT JOIN transfers tr ON t.id = tr.transaction_id
-        LEFT JOIN top_ups tp ON t.id = tp.transaction_id
-        WHERE (tr.sender_id = $1 OR tr.receiver_id = $1 OR tp.user_id = $1) 
-            AND t.created_at >= NOW() - INTERVAL '7 days'
-        GROUP BY date
-        ORDER BY date;
+        WITH date_series AS (
+            SELECT generate_series(
+                date_trunc('day', NOW() - INTERVAL '6 days'), 
+                date_trunc('day', NOW()), 
+                '1 day'::interval
+            ) AS date
+        ),
+        transactions_summary AS (
+            SELECT
+                date_trunc('day', t.created_at) AS date,
+                SUM(CASE 
+                    WHEN t.type = 'Transfer' AND tr.receiver_id = $1 THEN tr.amount 
+                    WHEN t.type = 'Topup' AND tp.user_id = $1 THEN tp.total_amount
+                    ELSE 0 
+                END) AS balance_in,
+                SUM(CASE WHEN t.type = 'Transfer' AND tr.sender_id = $1 THEN tr.amount ELSE 0 END) AS balance_out
+            FROM transactions t
+            LEFT JOIN transfers tr ON t.id = tr.transaction_id
+            LEFT JOIN top_ups tp ON t.id = tp.transaction_id
+            WHERE (tr.sender_id = $1 OR tr.receiver_id = $1 OR tp.user_id = $1) 
+                AND t.created_at >= NOW() - INTERVAL '7 days'
+            GROUP BY date
+        )
+        SELECT 
+            ds.date,
+            COALESCE(ts.balance_in, 0) AS balance_in,
+            COALESCE(ts.balance_out, 0) AS balance_out
+        FROM date_series ds
+        LEFT JOIN transactions_summary ts ON ds.date = ts.date
+        ORDER BY ds.date;
     `;
   
     const values = [id];

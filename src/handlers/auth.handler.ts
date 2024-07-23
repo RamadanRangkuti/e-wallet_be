@@ -65,7 +65,7 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
       err: "Internal Server Error"
     })
   }
-}
+};
 
 
 
