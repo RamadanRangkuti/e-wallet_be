@@ -10,8 +10,8 @@ const router = Router();
 
 router.get('/', getUser);
 router.get('/:id', authorization, getDetail);
-router.post('/', singleUploader("images"), add);
-router.patch('/:id', singleUploader("images"), update);
+router.post('/', singleUploader("image"), add);
+router.patch('/:id', singleUploader("image"), update);
 router.delete('/:id', remove);
 
 

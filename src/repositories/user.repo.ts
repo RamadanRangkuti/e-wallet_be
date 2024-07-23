@@ -68,7 +68,6 @@ export const getTotalUser = async (): Promise<{ rows: { total_user: string }[] }
 export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {
   let query = `SELECT fullname, email, phone, image FROM users WHERE id=$1`;
   const value = [id];
-  console.log(query);
   return db.query(query, value);
 };
 
@@ -85,7 +84,7 @@ export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>>
   let fields: string[] = [];
   let values: (string | number | null)[] = [];
 
-  const { fullname, email, image, pin, phone } = body;
+  const { fullname, email, image, phone } = body;
 
   if (fullname) {
     fields.push(`fullname = $${fields.length + 1}`);
@@ -101,11 +100,6 @@ export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>>
   if (image) {
     fields.push(`image = $${fields.length + 1}`);
     values.push(image);
-  }
-
-  if (pin) {
-    fields.push(`pin = $${fields.length + 1}`);
-    values.push(pin);
   }
 
   if (phone) {
