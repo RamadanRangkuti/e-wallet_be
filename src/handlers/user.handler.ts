@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
@@ -64,12 +64,12 @@ export const getDetail = async (req: Request<IParams>, res: Response) => {
     if (result.rows.length === 0) {
       return res.status(404).json({
         msg: "User not found",
-        data: []
+        data: [],
       });
     }
     return res.status(200).json({
       msg: "Success",
-      data: result.rows
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -82,7 +82,6 @@ export const getDetail = async (req: Request<IParams>, res: Response) => {
   }
 };
 
-
 export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   if (req.file?.filename) {
     req.body.image = req.file.filename;
@@ -91,7 +90,7 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
     const result = await addUser(req.body);
     return res.status(201).json({
       msg: "Success",
-      data: result.rows
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -132,12 +131,10 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
   }
 };
 
-
-
 export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
   const { password, newpassword } = req.body;
-  console.log(password)
+  console.log(password);
 
   try {
     // Ambil data user berdasarkan ID
@@ -150,7 +147,7 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
     }
 
     const existingHash = userResult.rows[0].password;
-    console.log(existingHash)
+    console.log(existingHash);
 
     // Bandingkan password saat ini
     const isValid = await bcrypt.compare(<string>password, <string>existingHash);
@@ -183,14 +180,13 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
   }
 };
 
-
 export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
   const { pin } = req.body;
 
   try {
     const salt = await bcrypt.genSalt();
-    const hashedPin = await bcrypt.hash(<string>pin, salt)
+    const hashedPin = await bcrypt.hash(<string>pin, salt);
     const result = await updatePass(id, hashedPin);
 
     return res.status(200).json({
@@ -208,7 +204,6 @@ export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response)
   }
 };
 
-
 export const remove = async (req: Request<IParams>, res: Response) => {
   const { id } = req.params;
   try {
@@ -216,12 +211,12 @@ export const remove = async (req: Request<IParams>, res: Response) => {
     if (result.rows.length === 0) {
       return res.status(404).json({
         msg: "User tidak ditemukan",
-        data: []
+        data: [],
       });
     }
     return res.status(200).json({
       msg: "Success Deleted User",
-      data: result.rows
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -233,5 +228,3 @@ export const remove = async (req: Request<IParams>, res: Response) => {
     });
   }
 };
-
-
