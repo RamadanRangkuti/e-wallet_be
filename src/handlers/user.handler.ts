@@ -28,7 +28,7 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
         data: [],
       });
     }
-
+    
     const dataUser = await getTotalUser();
     const page = parseInt((req.query.page as string) || "1");
     const totalData = parseInt(dataUser.rows[0].total_user);

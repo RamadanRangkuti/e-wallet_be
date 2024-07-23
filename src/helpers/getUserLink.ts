@@ -1,8 +1,8 @@
 import { Request } from "express-serve-static-core";
-import { AppUserParams, QueryUserParams } from "../models/params";
+import { AppParams, QueryUserParams } from "../models/params";
 import { IUserQuery } from "../models/user.model";
 
-const getUserLink = (req: Request<AppUserParams, {}, {}, QueryUserParams>, info?: "previous" | "next"): string => {
+const getUserLink = (req: Request<AppParams, {}, {}, QueryUserParams>, info?: "previous" | "next"): string => {
     const { path, hostname, query, protocol, baseUrl } = req;
     const getNewPage = (page: string): number => {
       if (info === "next") return parseInt(page) + 1;

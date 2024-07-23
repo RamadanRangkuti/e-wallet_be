@@ -1,6 +1,16 @@
 export interface IParams {
   id: string;
 }
+export interface dataUser{
+  id: number;
+  uuid: string;
+  fullname?: string;
+  email?: string;
+  image?: string;
+  phone?: string;
+  created_at?: string;
+  updated_at?: string | null;
+}
 
 export interface IBody {
   fullname: string;
@@ -23,7 +33,8 @@ export interface IDataUser extends IBody{
   updated_at: string | null;
 }
 
-export interface IUserQuery extends IDataUser{
+export interface IUserQuery{
+  fullname?: string;
   min_balance?: number;
   max_balance?: number;
   phone?: string;

@@ -17,6 +17,6 @@ interface IPaginationMeta {
   }
 
   export interface IUserResponse extends IBasicResponse {
-    data?: IDataUser[];
+    data?: IUser[];
   }
   
