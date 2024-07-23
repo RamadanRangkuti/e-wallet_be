@@ -16,6 +16,7 @@ export interface IBody {
   fullname: string;
   email?: string;
   password?: string;
+  newpassword?: string;
   pin?: string;
   image?: string;
   phone?: string;
