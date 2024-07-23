@@ -9,29 +9,27 @@ import { IPayload } from "../models/payload.model";
 // import { IPayload } from "../models/payload.model";
 import { jwtOptions } from "../middlewares/authorization";
 
-
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
   const { password, pin } = req.body;
   try {
     const salt = await bcrypt.genSalt();
     const hashedPw = await bcrypt.hash(password, salt);
-    const hashedPin = await bcrypt.hash(pin, salt)
+    const hashedPin = await bcrypt.hash(pin, salt);
     const result = await registerUser(req.body, hashedPw, hashedPin);
     return res.status(201).json({
       msg: "Success",
-      data: result.rows
+      data: result.rows,
     });
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.message);
-    };
+    }
     return res.status(500).json({
       msg: "Error",
-      err: "Internal Server Error"
+      err: "Internal Server Error",
     });
-  };
+  }
 };
-
 
 export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
   const { email, password } = req.body;
@@ -43,31 +41,28 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
     const isValid = await bcrypt.compare(password, hash);
     if (!isValid) throw new Error("Username or password is wrong!!!");
 
-
     const payload: IPayload = {
       id,
-      email
-    }
-    const token = jwt.sign(payload, <string>process.env.JWT_KEY, jwtOptions)
+      email,
+    };
+    const token = jwt.sign(payload, <string>process.env.JWT_KEY, jwtOptions);
     return res.status(200).json({
       msg: `Selamat datang ${email} `,
-      data: [{ token }]
-    })
+      data: [{ token }],
+    });
   } catch (err) {
     if (err instanceof Error) {
       return res.status(401).json({
         msg: "Error",
-        err: err.message
-      })
+        err: err.message,
+      });
     }
     return res.status(500).json({
       msg: "Error",
-      err: "Internal Server Error"
-    })
+      err: "Internal Server Error",
+    });
   }
 };
-
-
 
 // export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
 //   const { email, password } = req.body;
