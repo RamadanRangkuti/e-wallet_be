@@ -1,11 +1,50 @@
 import { Request, Response } from "express";
-import { addUser, deleteUser, getDetailUser, getUser, updateUser } from "../repositories/user.repo";
+import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
+import  getUserLink from "../helpers/getUserLink";
+import { IUserResponse } from "../models/response";
+import { IUserQuery } from "../models/user.model";
 
-export const get = async (req: Request, res: Response) => {
+// export const get = async (req: Request, res: Response) => {
+//   try {
+//     const result = await getUser();
+//     return res.status(200).json(result.rows);
+//   } catch (err) {
+//     if (err instanceof Error) {
+//       console.log(err.message);
+//     }
+//     return res.status(500).json({
+//       msg: "Error",
+//       err: "Internal Server Error",
+//     });
+//   }
+// };
+export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Response<IUserResponse>) => {
   try {
-    const result = await getUser();
-    return res.status(200).json(result.rows);
+    const result = await getAllUsers(req.query);
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        msg: "User tidak ditemukan",
+        data: [],
+      });
+    }
+
+    const dataUser = await getTotalUser();
+    const page = parseInt((req.query.page as string) || "1");
+    const totalData = parseInt(dataUser.rows[0].total_user);
+    const totalPage = Math.ceil(totalData / 5);
+
+    return res.status(200).json({
+      msg: "Success",
+      data: result.rows,
+      meta: {
+        totalData,
+        totalPage,
+        page,
+        prevLink: page > 1 ? getUserLink(req, "previous") : null,
+        nextLink: page < totalPage ? getUserLink(req, "next") : null,
+      },
+    });
   } catch (err) {
     if (err instanceof Error) {
       console.log(err.message);
@@ -16,7 +55,6 @@ export const get = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const getDetail = async (req: Request<IParams>, res: Response) => {
   try {
