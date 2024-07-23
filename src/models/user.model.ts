@@ -16,13 +16,14 @@ export interface IBody {
   fullname: string;
   email?: string;
   password?: string;
+  newpassword?: string;
   pin?: string;
   image?: string;
   phone?: string;
 }
 export interface IUser extends IBody {
-  id: string,
-  created_at: string,
+  id: string;
+  created_at: string;
   updated_at?: string | null;
 }
 
