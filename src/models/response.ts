@@ -1,5 +1,17 @@
+import { IDataTransaction, ITopUpData, ITransferData } from "./transaction.model";
 import { IUser } from "./user.model";
-import { IDataUser } from "./user.model";
+
+export interface ITransactionResponse extends IBasicResponse {
+    data?: IDataTransaction[];
+}
+
+export interface ITransferResponse extends IBasicResponse {
+    data?: ITransferData[];
+}
+
+export interface ITopupResponse extends IBasicResponse {
+    data?: ITopUpData[];
+}
 
 interface IPaginationMeta {
     totalData?: number;
