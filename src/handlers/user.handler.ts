@@ -5,6 +5,8 @@ import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
+import { UploadApiResponse } from "cloudinary";
+import { cloudinaryUploader } from "../helpers/cloudinary";
 
 // export const get = async (req: Request, res: Response) => {
 //   try {
@@ -103,14 +105,19 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   }
 };
 
-export const update = async (req: Request<IParams, {}, IBody>, res: Response) => {
+export const update = async (req: Request<{ id: string }, {}, IBody>, res: Response) => {
   const { id } = req.params;
-  if (req.file?.filename) {
-    req.body.image = req.file.filename;
-  }
+  const { file } = req;
+
   try {
-    const result = await updateUser(id, req.body);
-    if (result.rowCount === 0) {
+    let uploadResult: UploadApiResponse | undefined;
+    if (file) {
+      const { result, error } = await cloudinaryUploader(req, "user", id as string);
+      uploadResult = result;
+      if (error) throw error;
+    }
+    const dbResult = await updateUser(id, req.body, uploadResult?.secure_url);
+    if (dbResult.rowCount === 0) {
       return res.status(404).json({
         msg: "error",
         err: "User not found",
@@ -118,7 +125,7 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
     }
     return res.status(200).json({
       msg: "success",
-      data: result.rows,
+      data: dbResult.rows,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
