@@ -5,8 +5,6 @@ import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
-import { UploadApiResponse } from "cloudinary";
-import { cloudinaryUploader } from "../helpers/cloudinary";
 
 // export const get = async (req: Request, res: Response) => {
 //   try {
@@ -105,13 +103,13 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   }
 };
 
-export const update = async (req: Request<{ id: string }, {}, IBody>, res: Response) => {
+export const update = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
-  const { pin } = req.body;
+  if (req.file?.filename) {
+    req.body.image = req.file.filename;
+  }
   try {
-    const salt = await bcrypt.genSalt();
-    const hashed = await bcrypt.hash(<string>pin, salt);
-    const result = await updateUser(id, req.body, hashed);
+    const result = await updateUser(id, req.body);
     if (result.rowCount === 0) {
       return res.status(404).json({
         msg: "error",
@@ -184,9 +182,12 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
 
 export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
+  const { pin } = req.body;
 
   try {
-    const result = await updatePass(id, req.body);
+    const salt = await bcrypt.genSalt();
+    const hashedPin = await bcrypt.hash(<string>pin, salt);
+    const result = await updatePass(id, hashedPin);
 
     return res.status(200).json({
       msg: "success",
