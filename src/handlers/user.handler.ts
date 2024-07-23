@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser } from "../repositories/user.repo";
+import bcrypt from "bcrypt"
+import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
-import { IUserResponse } from "../models/response";
+import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
 
 // export const get = async (req: Request, res: Response) => {
@@ -121,6 +122,82 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
       data: result.rows,
     });
   } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
+
+
+
+export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Response) => {
+  const { id } = req.params;
+  const { password, newpassword } = req.body;
+  console.log(password)
+
+  try {
+    // Ambil data user berdasarkan ID
+    const userResult = await getDetailUser(id);
+    if (userResult.rowCount == 0) {
+      return res.status(404).json({
+        msg: "error",
+        err: "User not found",
+      });
+    }
+
+    const existingHash = userResult.rows[0].password;
+    console.log(existingHash)
+
+    // Bandingkan password saat ini
+    const isValid = await bcrypt.compare(<string>password, <string>existingHash);
+    if (!isValid) {
+      return res.status(400).json({
+        msg: "error",
+        err: "Password saat ini tidak sesuai",
+      });
+    }
+
+    // Hash password baru
+    const salt = await bcrypt.genSalt();
+    const hashedNewPassword = await bcrypt.hash(<string>newpassword, salt);
+
+    // Update password di database
+    const result = await updatePass(id, hashedNewPassword);
+
+    return res.status(200).json({
+      msg: "success",
+      data: result.rows,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
+
+
+export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
+  const { id } = req.params;
+  const { pin } = req.body;
+
+  try {
+    const salt = await bcrypt.genSalt();
+    const hashedPin = await bcrypt.hash(<string>pin, salt)
+    const result = await updatePass(id, hashedPin);
+
+    return res.status(200).json({
+      msg: "success",
+      data: result.rows,
+    });
+  } catch (err) {
     if (err instanceof Error) {
       console.log(err.message);
     }
