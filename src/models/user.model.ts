@@ -42,3 +42,13 @@ export interface IUserQuery{
   page?: string;
   limit?: string;
 }
+
+export interface IRegisterBody extends IBody {
+  password: string;
+  pin: string;
+}
+
+export interface ILoginBody {
+  email: string;
+  password: string;
+}

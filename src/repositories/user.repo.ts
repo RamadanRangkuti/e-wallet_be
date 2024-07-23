@@ -4,7 +4,7 @@ import { IUser, IBody, IUserQuery } from "../models/user.model";
 
 
 export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
-  let query = `SELECT fullname, phone, balance FROM users`;
+  let query = `SELECT fullname, email, phone, balance FROM users`;
   const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
   const values = [];
   let condition = false;
