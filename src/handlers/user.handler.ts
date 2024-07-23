@@ -3,7 +3,7 @@ import bcrypt from "bcrypt"
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
-import { IUserResponse } from "../models/response";
+import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
 
 // export const get = async (req: Request, res: Response) => {
