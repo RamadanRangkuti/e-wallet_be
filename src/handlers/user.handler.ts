@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
-import  getUserLink from "../helpers/getUserLink";
+import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response";
 import { IUserQuery } from "../models/user.model";
 
@@ -28,7 +28,7 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
         data: [],
       });
     }
-    
+
     const dataUser = await getTotalUser();
     const page = parseInt((req.query.page as string) || "1");
     const totalData = parseInt(dataUser.rows[0].total_user);
@@ -80,6 +80,7 @@ export const getDetail = async (req: Request<IParams>, res: Response) => {
     });
   }
 };
+
 
 export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   if (req.file?.filename) {

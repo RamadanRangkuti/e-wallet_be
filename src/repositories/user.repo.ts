@@ -57,7 +57,7 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
     query += ` LIMIT 8 OFFSET $${values.length + 1}`;
     values.push(offset);
   }
-  return db.query(query, values); 
+  return db.query(query, values);
 };
 
 export const getTotalUser = async (): Promise<{ rows: { total_user: string }[] }> => {
