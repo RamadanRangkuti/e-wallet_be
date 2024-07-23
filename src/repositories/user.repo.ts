@@ -1,10 +1,67 @@
 import { QueryResult } from "pg";
 import db from "../configs/connection";
-import { IUser, IBody } from "../models/user.model";
+import { IUser, IBody, IUserQuery } from "../models/user.model";
 
-export const getUser = (): Promise<QueryResult<IUser>> => {
-  let query = `SELECT fullname, email, phone, image FROM users`;
 
+export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
+  let query = `SELECT fullname, email, phone, balance FROM users`;
+  const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
+  const values = [];
+  let condition = false;
+
+  if (fullname) {
+    query += ` WHERE fullname ILIKE $${values.length + 1}
+    OR phone ILIKE $${values.length + 1}`;
+    values.push(`%${fullname}%`);
+    condition = true;
+  }
+  // if (min_balance) {
+  //   query += condition ? " AND " : " WHERE ";
+  //   query += ` balance > $${values.length + 1}`;
+  //   values.push(min_balance);
+  //   condition = true;
+  // }
+  // if (max_balance) {
+  //   query += condition ? " AND " : " WHERE ";
+  //   query += ` balance < $${values.length + 1}`;
+  //   values.push(max_balance);
+  //   condition = true;
+  // }
+  if (phone) {
+    query += condition ? " AND " : " WHERE ";
+    query += ` phone = $${values.length + 1}`;
+    values.push(phone);
+    condition = true;
+  }
+
+  switch (sortBy) {
+    case "alphabet":
+      query += " ORDER BY fullname ASC";
+      break;
+    // case "balance":
+    //   query += " ORDER BY balance ASC";
+    //   break;
+    // case "latest":
+    //   query += " ORDER BY created_at DESC";
+    //   break;
+    // case "oldest":
+    //   query += " ORDER BY created_at ASC";
+    //   break;
+    default:
+      query += " ORDER BY id ASC"; // Default sorting jika tidak disebutkan sortBy
+      break;
+  }
+
+  if (page) {
+    const offset = (parseInt(page.toString()) - 1) * 5;
+    query += ` LIMIT 8 OFFSET $${values.length + 1}`;
+    values.push(offset);
+  }
+  return db.query(query, values); 
+};
+
+export const getTotalUser = async (): Promise<{ rows: { total_user: string }[] }> => {
+  const query = `SELECT COUNT(*) AS total_user FROM users`;
   return db.query(query);
 };
 
