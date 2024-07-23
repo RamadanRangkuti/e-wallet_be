@@ -39,11 +39,14 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
     const result = await loginUser(email);
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
     if (!result.rows.length) throw new Error("Username or password is wrong!!!");
-    const { password: hash } = result.rows[0];
+    const { password: hash, id } = result.rows[0];
     const isValid = await bcrypt.compare(password, hash);
     if (!isValid) throw new Error("Username or password is wrong!!!");
+
+
     const payload: IPayload = {
-      email,
+      id,
+      email
     }
     const token = jwt.sign(payload, <string>process.env.JWT_KEY, jwtOptions)
     return res.status(200).json({
@@ -62,7 +65,9 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
       err: "Internal Server Error"
     })
   }
-}
+};
+
+
 
 // export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
 //   const { email, password } = req.body;
