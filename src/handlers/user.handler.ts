@@ -109,11 +109,8 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
   if (req.file?.filename) {
     req.body.image = req.file.filename;
   }
-  const { pin } = req.body;
   try {
-    const salt = await bcrypt.genSalt();
-    const hashed = await bcrypt.hash(<string>pin, salt);
-    const result = await updateUser(id, req.body, hashed);
+    const result = await updateUser(id, req.body);
     if (result.rowCount === 0) {
       return res.status(404).json({
         msg: "error",
@@ -134,6 +131,8 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
     });
   }
 };
+
+
 
 export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
@@ -168,6 +167,31 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
 
     // Update password di database
     const result = await updatePass(id, hashedNewPassword);
+
+    return res.status(200).json({
+      msg: "success",
+      data: result.rows,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
+
+
+export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
+  const { id } = req.params;
+  const { pin } = req.body;
+
+  try {
+    const salt = await bcrypt.genSalt();
+    const hashedPin = await bcrypt.hash(<string>pin, salt)
+    const result = await updatePass(id, hashedPin);
 
     return res.status(200).json({
       msg: "success",
