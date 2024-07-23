@@ -79,7 +79,7 @@ export const addUser = (body: IBody): Promise<QueryResult<IUser>> => {
   return db.query(query, values);
 }
 
-export const updateUser = (id: string, body: IBody, hashedPin: string): Promise<QueryResult<IUser>> => {
+export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>> => {
   let query = `UPDATE users SET `;
   let fields: string[] = [];
   let values: (string | number | null)[] = [];
@@ -107,11 +107,6 @@ export const updateUser = (id: string, body: IBody, hashedPin: string): Promise<
     values.push(phone);
   }
 
-  if (hashedPin) {
-    fields.push(`pin = $${fields.length + 1}`);
-    values.push(hashedPin);
-  }
-
   fields.push(`updated_at = now()`);
 
   query += fields.join(', ');
@@ -123,6 +118,12 @@ export const updateUser = (id: string, body: IBody, hashedPin: string): Promise<
   return db.query(query, values);
 };
 
+
+export const updatePin = (id: string, hashedPin: string): Promise<QueryResult<IUser>> => {
+  const query = `UPDATE users SET pin = $1 WHERE id = $2 RETURNING *`;
+  const values = [hashedPin, id];
+  return db.query(query, values);
+};
 
 export const updatePass = (id: string, hashedPassword: string): Promise<QueryResult<IUser>> => {
   const query = `UPDATE users SET password = $1 WHERE id = $2 RETURNING *`;
