@@ -22,7 +22,7 @@ export interface IDataTransaction {
     user_id?: number;
     method?: 'BRI' | 'BCA' | 'DANA' | 'GoPay' | 'OVO';
     top_up_amount?: number;
-    discount?: number;
+    admin?: number;
     total_amount?: number;
   }
   
@@ -37,7 +37,7 @@ export interface IDataTransaction {
     user_id: number;
     payment_id: number;
     amount: number;
-    discount?: number;
+    admin?: number;
     total_amount: number;
   }
   

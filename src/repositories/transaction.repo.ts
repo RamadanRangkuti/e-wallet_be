@@ -10,9 +10,11 @@ export const getTransactionsByUser = (id: number, searchQuery?: string): Promise
       t.created_at,
       t.updated_at,
       tr.sender_id,
+      sender.image AS sender_image,
       sender.fullname AS sender_fullname,
       sender.phone AS sender_phone,
       tr.receiver_id,
+      receiver.image AS receiver_image,
       receiver.fullname AS receiver_fullname,
       receiver.phone AS receiver_phone,
       tr.amount AS transfer_amount,
@@ -20,7 +22,7 @@ export const getTransactionsByUser = (id: number, searchQuery?: string): Promise
       tp.user_id,
       p.method,
       tp.amount AS top_up_amount,
-      tp.discount,
+      tp.admin,
       tp.total_amount
     FROM transactions t
     LEFT JOIN transfers tr ON t.id = tr.transaction_id
@@ -92,7 +94,7 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
     `;
     
     const insertTopUpQuery = `
-      INSERT INTO top_ups (transaction_id, user_id, payment_id, amount, discount, total_amount) 
+      INSERT INTO top_ups (transaction_id, user_id, payment_id, amount, admin, total_amount) 
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
     
@@ -100,8 +102,8 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
       UPDATE users SET balance = balance + $1 WHERE id = $2
     `;
     
-    const { user_id, payment_id, amount, discount = 0 } = topUp; // Default discount to 0 if not provided
-    const totalAmount = amount - discount; // Calculate total amount
+    const { user_id, payment_id, amount, admin = 0 } = topUp; // Default admin to 0 if not provided
+    const totalAmount = amount - admin; // Calculate total amount
 
     try {
       await db.query('BEGIN');
@@ -111,7 +113,7 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
       const transactionId = transactionResult.rows[0].id;
       
       // Insert top-up details
-      await db.query(insertTopUpQuery, [transactionId, user_id, payment_id, amount, discount, totalAmount]);
+      await db.query(insertTopUpQuery, [transactionId, user_id, payment_id, amount, admin, totalAmount]);
       
       // Update user balance
       await db.query(updateUserBalanceQuery, [totalAmount, user_id]);
@@ -126,7 +128,7 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
 };
 
   // Get balance for the last 7 days
-export const getBalanceForLast7Days = (id: number): Promise<QueryResult<any>> => {
+export const getBalanceForLast7Days = (id: number): Promise<QueryResult<IDataTransaction>> => {
     const query = `
         WITH date_series AS (
             SELECT generate_series(
