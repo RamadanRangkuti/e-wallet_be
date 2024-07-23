@@ -8,7 +8,7 @@ import { authorization } from "../middlewares/authorization";
 const router = Router();
 
 
-router.get('/', authorization, get);
+router.get('/', get);
 router.get('/:id', authorization, getDetail);
 router.post('/', singleUploader("images"), add);
 router.patch('/:id', singleUploader("images"), update);

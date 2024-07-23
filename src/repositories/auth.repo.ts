@@ -2,11 +2,11 @@ import { QueryResult } from "pg";
 import db from "../configs/connection";
 import { IBody, IUser } from "../models/user.model";
 
-export const registerUser = (body: IBody, hashedPassword: string): Promise<QueryResult<IUser>> => {
-  const query = `INSERT INTO users (email, password)
-  values($1,$2) returning email`
+export const registerUser = (body: IBody, hashedPassword: string, hashedPin: string): Promise<QueryResult<IUser>> => {
+  const query = `INSERT INTO users (email, password, pin)
+  values($1,$2,$3) returning email`
   const { email } = body;
-  const values = [email, hashedPassword];
+  const values = [email, hashedPassword, hashedPin];
   return db.query(query, values);
 };
 

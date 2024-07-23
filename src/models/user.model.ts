@@ -19,6 +19,7 @@ export interface IUser extends IBody {
 
 export interface IRegisterBody extends IBody {
   password: string;
+  pin: string;
 }
 
 export interface ILoginBody {

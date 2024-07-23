@@ -11,11 +11,12 @@ import { jwtOptions } from "../middlewares/authorization";
 
 
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
-  const { password } = req.body;
+  const { password, pin } = req.body;
   try {
     const salt = await bcrypt.genSalt();
-    const hashed = await bcrypt.hash(password, salt);
-    const result = await registerUser(req.body, hashed);
+    const hashedPw = await bcrypt.hash(password, salt);
+    const hashedPin = await bcrypt.hash(pin, salt)
+    const result = await registerUser(req.body, hashedPw, hashedPin);
     return res.status(201).json({
       msg: "Success",
       data: result.rows
