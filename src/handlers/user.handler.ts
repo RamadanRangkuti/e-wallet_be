@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
-import { IUserResponse } from "../models/response";
+import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
 import { UploadApiResponse } from "cloudinary";
 import { cloudinaryUploader } from "../helpers/cloudinary";
@@ -166,6 +166,27 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
 
     // Update password di database
     const result = await updatePass(id, hashedNewPassword);
+
+    return res.status(200).json({
+      msg: "success",
+      data: result.rows,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
+
+export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const result = await updatePass(id, req.body);
 
     return res.status(200).json({
       msg: "success",
