@@ -2,7 +2,6 @@ import { QueryResult } from "pg";
 import db from "../configs/connection";
 import { IUser, IBody, IUserQuery } from "../models/user.model";
 
-
 export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   let query = `SELECT fullname, email, phone, balance FROM users`;
   const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
@@ -72,13 +71,12 @@ export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {
   return db.query(query, value);
 };
 
-
 export const addUser = (body: IBody): Promise<QueryResult<IUser>> => {
   const query = `INSERT INTO users (fullname, email, password, image, pin, phone) values ($1,$2,$3,$4,$5,$6) returning *`;
   const { fullname, email, password, image, pin, phone } = body;
   const values = [fullname, email, password, pin, image, phone];
   return db.query(query, values);
-}
+};
 
 export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>> => {
   let query = `UPDATE users SET `;
@@ -96,8 +94,6 @@ export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>>
     fields.push(`email = $${fields.length + 1}`);
     values.push(email);
   }
-
-
   if (image) {
     fields.push(`image = $${fields.length + 1}`);
     values.push(image);
@@ -113,10 +109,9 @@ export const updateUser = (id: string, body: IBody): Promise<QueryResult<IUser>>
     values.push(phone);
   }
 
-
   fields.push(`updated_at = now()`);
 
-  query += fields.join(', ');
+  query += fields.join(", ");
 
   const idNumber = values.length + 1;
   query += ` WHERE id = $${idNumber} returning *`;
