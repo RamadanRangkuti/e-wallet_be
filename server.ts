@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors, { CorsOptions } from "cors";
 import * as dotenv from "dotenv";
 import morgan from "morgan";
@@ -21,6 +21,10 @@ app.use(cors());
 //logger
 const logger = morgan("dev");
 app.use(logger);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Tes");
+})
 
 app.use('/api/v1', router);
 
