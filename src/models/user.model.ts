@@ -16,3 +16,12 @@ export interface IUser extends IBody {
   created_at: string,
   updated_at?: string | null;
 }
+
+export interface IRegisterBody extends IBody {
+  password: string;
+}
+
+export interface ILoginBody {
+  email: string;
+  password: string;
+}
