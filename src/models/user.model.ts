@@ -41,7 +41,6 @@ export interface IUserQuery {
   phone?: string;
   sortBy?: string;
   page?: string;
-  limit?: string;
 }
 
 export interface IRegisterBody extends IBody {
