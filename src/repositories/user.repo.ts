@@ -3,40 +3,38 @@ import db from "../configs/connection";
 import { IUser, IBody, IUserQuery } from "../models/user.model";
 
 export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
-  let query = `SELECT fullname, email, phone, balance FROM users`;
+  let query = `SELECT id, fullname, email, phone, balance FROM users`;
   const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
-  const values = [];
-  let condition = false;
+  const values: any[] = [];
+  const conditions: string[] = [];
 
   if (fullname) {
-    query += ` WHERE fullname ILIKE $${values.length + 1}
-    OR phone ILIKE $${values.length + 1}`;
+    conditions.push(`(fullname ILIKE $${values.length + 1} OR phone ILIKE $${values.length + 1})`);
     values.push(`%${fullname}%`);
-    condition = true;
   }
+  // Uncomment and adjust these conditions as necessary
   // if (min_balance) {
-  //   query += condition ? " AND " : " WHERE ";
-  //   query += ` balance > $${values.length + 1}`;
+  //   conditions.push(`balance > $${values.length + 1}`);
   //   values.push(min_balance);
-  //   condition = true;
   // }
   // if (max_balance) {
-  //   query += condition ? " AND " : " WHERE ";
-  //   query += ` balance < $${values.length + 1}`;
+  //   conditions.push(`balance < $${values.length + 1}`);
   //   values.push(max_balance);
-  //   condition = true;
   // }
-  if (phone) {
-    query += condition ? " AND " : " WHERE ";
-    query += ` phone = $${values.length + 1}`;
-    values.push(phone);
-    condition = true;
+  // if (phone) {
+  //   conditions.push(`phone = $${values.length + 1}`);
+  //   values.push(phone);
+  // }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
   }
 
   switch (sortBy) {
     case "alphabet":
       query += " ORDER BY fullname ASC";
       break;
+    // Uncomment and adjust these sorting conditions as necessary
     // case "balance":
     //   query += " ORDER BY balance ASC";
     //   break;
@@ -47,22 +45,38 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
     //   query += " ORDER BY created_at ASC";
     //   break;
     default:
-      query += " ORDER BY id ASC"; // Default sorting jika tidak disebutkan sortBy
+      query += " ORDER BY id ASC"; // Default sorting if sortBy is not specified
       break;
   }
 
   if (page) {
-    const offset = (parseInt(page.toString()) - 1) * 5;
-    query += ` LIMIT 8 OFFSET $${values.length + 1}`;
-    values.push(offset);
+    const offset = (parseInt(page) - 1) * 8;
+    query += ` LIMIT 8 OFFSET ${offset}`;
   }
+
+  console.log("Query:", query);
+  console.log("Values:", values);
+
   return db.query(query, values);
 };
 
-export const getTotalUser = async (): Promise<{ rows: { total_user: string }[] }> => {
-  const query = `SELECT COUNT(*) AS total_user FROM users`;
-  return db.query(query);
+
+export const getTotalUser = async ({ fullname = '' }: IUserQuery): Promise<{ rows: { total_user: string }[] }> => {
+  let query = `SELECT COUNT(*) as total_user FROM users`;
+  const values: any[] = [];
+
+  if (fullname) {
+    query += ` WHERE fullname ILIKE $${values.length + 1} OR phone ILIKE $${values.length + 1}`;
+    values.push(`%${fullname}%`);
+  }
+
+  console.log("Query:", query);
+  console.log("Values:", values);
+
+  return db.query(query, values);
 };
+
+
 
 export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {
   let query = `SELECT fullname, email, balance, phone, image, password, pin FROM users WHERE id=$1`;

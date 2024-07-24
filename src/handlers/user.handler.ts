@@ -32,10 +32,13 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
       });
     }
 
-    const dataUser = await getTotalUser();
+    const dataUser = await getTotalUser(req.query);
+    console.log(dataUser.rows);
     const page = parseInt((req.query.page as string) || "1");
     const totalData = parseInt(dataUser.rows[0].total_user);
-    const totalPage = Math.ceil(totalData / 5);
+    const totalPage = Math.ceil(totalData / 8);
+
+    console.log(req.query);
 
     return res.status(200).json({
       msg: "Success",
@@ -45,7 +48,7 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
         totalPage,
         page,
         prevLink: page > 1 ? getUserLink(req, "previous") : null,
-        nextLink: page < totalPage ? getUserLink(req, "next") : null,
+        nextLink: page != totalPage ? getUserLink(req, "next") : null,
       },
     });
   } catch (err) {
