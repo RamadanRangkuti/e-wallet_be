@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
-import { IUserResponse } from "../models/response";
+import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
+import { UploadApiResponse } from "cloudinary";
+import { cloudinaryUploader } from "../helpers/cloudinary";
 
 // export const get = async (req: Request, res: Response) => {
 //   try {
@@ -67,12 +69,12 @@ export const getDetail = async (req: Request<IParams>, res: Response) => {
     if (result.rows.length === 0) {
       return res.status(404).json({
         msg: "User not found",
-        data: []
+        data: [],
       });
     }
     return res.status(200).json({
       msg: "Success",
-      data: result.rows
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -84,7 +86,6 @@ export const getDetail = async (req: Request<IParams>, res: Response) => {
     });
   }
 };
-
 
 export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   if (req.file?.filename) {
@@ -94,7 +95,7 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
     const result = await addUser(req.body);
     return res.status(201).json({
       msg: "Success",
-      data: result.rows
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -107,17 +108,19 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
   }
 };
 
-export const update = async (req: Request<IParams, {}, IBody>, res: Response) => {
+export const update = async (req: Request<{ id: string }, {}, IBody>, res: Response) => {
   const { id } = req.params;
-  if (req.file?.filename) {
-    req.body.image = req.file.filename;
-  }
-  const { pin } = req.body;
+  const { file } = req;
+
   try {
-    const salt = await bcrypt.genSalt();
-    const hashed = await bcrypt.hash(<string>pin, salt);
-    const result = await updateUser(id, req.body, hashed);
-    if (result.rowCount === 0) {
+    let uploadResult: UploadApiResponse | undefined;
+    if (file) {
+      const { result, error } = await cloudinaryUploader(req, "user", id as string);
+      uploadResult = result;
+      if (error) throw error;
+    }
+    const dbResult = await updateUser(id, req.body, uploadResult?.secure_url);
+    if (dbResult.rowCount === 0) {
       return res.status(404).json({
         msg: "error",
         err: "User not found",
@@ -125,7 +128,7 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
     }
     return res.status(200).json({
       msg: "success",
-      data: result.rows,
+      data: dbResult.rows,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -141,7 +144,7 @@ export const update = async (req: Request<IParams, {}, IBody>, res: Response) =>
 export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
   const { password, newpassword } = req.body;
-  console.log(password)
+  console.log(password);
 
   try {
     // Ambil data user berdasarkan ID
@@ -154,7 +157,7 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
     }
 
     const existingHash = userResult.rows[0].password;
-    console.log(existingHash)
+    console.log(existingHash);
 
     // Bandingkan password saat ini
     const isValid = await bcrypt.compare(<string>password, <string>existingHash);
@@ -187,20 +190,18 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
   }
 };
 
-
-export const remove = async (req: Request<IParams>, res: Response) => {
+export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
+  const { pin } = req.body;
+
   try {
-    const result = await deleteUser(id);
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        msg: "User tidak ditemukan",
-        data: []
-      });
-    }
+    const salt = await bcrypt.genSalt();
+    const hashedPin = await bcrypt.hash(<string>pin, salt);
+    const result = await updatePass(id, hashedPin);
+
     return res.status(200).json({
-      msg: "Success Deleted User",
-      data: result.rows
+      msg: "success",
+      data: result.rows,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -213,4 +214,27 @@ export const remove = async (req: Request<IParams>, res: Response) => {
   }
 };
 
-
+export const remove = async (req: Request<IParams>, res: Response) => {
+  const { id } = req.params;
+  try {
+    const result = await deleteUser(id);
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        msg: "User tidak ditemukan",
+        data: [],
+      });
+    }
+    return res.status(200).json({
+      msg: "Success Deleted User",
+      data: result.rows,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};

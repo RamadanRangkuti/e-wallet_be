@@ -22,8 +22,8 @@ export interface IBody {
   phone?: string;
 }
 export interface IUser extends IBody {
-  id: string,
-  created_at: string,
+  id: string;
+  created_at: string;
   updated_at?: string | null;
 }
 

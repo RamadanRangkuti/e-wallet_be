@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from '../repositories/transaction.repo';
 import { ITopUpData, ITransactionParams, ITransferData } from '../models/transaction.model';
-import { ITransactionResponse } from '../models/response';
+import { ITransactionResponse } from '../models/response.model';
 
 
 export const getTransactions = async (req: Request<ITransactionParams>, res: Response<ITransactionResponse>) => {
