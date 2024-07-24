@@ -62,23 +62,30 @@ export const getUserTransactions = async (req: Request, res: Response) => {
 
 // Handler to perform a transfer
 export const makeTransfer = async (req: Request, res: Response) => {
-    const transfer: ITransferData = req.body;
-    try {
-      const result = await performTransfer(transfer);
-      return res.status(201).json({
-        msg: "Transfer Successful",
-        transactionId: result.transactionId,
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err.message);
+  const transfer: ITransferData = req.body;
+
+  try {
+    const result = await performTransfer(transfer);
+    return res.status(201).json({
+      msg: "Transfer Successful",
+      transactionId: result.transactionId,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message);
+      if (err.message === 'Your balance is not enough, please top up!') {
+        return res.status(400).json({
+          msg: "Error",
+          err: "Your balance is not enough, please top up!",
+        });
       }
-      return res.status(500).json({
-        msg: "Error",
-        err: "Internal Server Error",
-      });
     }
-  };
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
 
   // Handler to perform a top-up
 export const makeTopUp = async (req: Request, res: Response) => {
