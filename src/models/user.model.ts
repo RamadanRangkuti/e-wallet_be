@@ -16,6 +16,7 @@ export interface IBody {
   fullname: string;
   email?: string;
   password?: string;
+  newpassword?: string;
   pin?: string;
   image?: string;
   phone?: string;
@@ -40,7 +41,6 @@ export interface IUserQuery {
   phone?: string;
   sortBy?: string;
   page?: string;
-  limit?: string;
 }
 
 export interface IRegisterBody extends IBody {
