@@ -12,11 +12,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(cors());
-// const configs: CorsOptions = {
-//   origin: ["http://localhost:8080"],
-//   methods: ["POST", "PATCH"],
-//   allowedHeaders: ["Authorization", "x-headers"],
-// };
+const configs: CorsOptions = {
+  origin: ["http://localhost:8080", "https://e-wallet-fe-pi.vercel.app/"],
+  methods: ["POST", "PATCH"],
+  allowedHeaders: ["Authorization", "x-headers", "Content-Type"],
+};
 
 //logger
 const logger = morgan("dev");
