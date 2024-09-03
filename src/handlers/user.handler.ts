@@ -118,6 +118,7 @@ export const update = async (req: Request<{ id: string }, {}, IBody>, res: Respo
       const { result, error } = await cloudinaryUploader(req, "user", id);
       uploadResult = result;
       if (error) throw error;
+      // console.log("Upload Result:", uploadResult);
     }
     const dbResult = await updateUser(req.body, id, uploadResult?.secure_url);
     if (dbResult.rowCount === 0) {
