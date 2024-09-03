@@ -27,9 +27,9 @@ app.use(express.static("./public/images"));
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Tes");
-})
+});
 
-app.use('/api/v1', router);
+app.use("/api/v1", router);
 
 const PORT = process.env.PORT || 8000;
 
