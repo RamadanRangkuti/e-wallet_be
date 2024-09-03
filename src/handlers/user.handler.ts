@@ -115,24 +115,29 @@ export const update = async (req: Request<{ id: string }, {}, IBody>, res: Respo
   try {
     let uploadResult: UploadApiResponse | undefined;
     if (file) {
-      const { result, error } = await cloudinaryUploader(req, "user", id as string);
+      const { result, error } = await cloudinaryUploader(req, "user", id);
       uploadResult = result;
       if (error) throw error;
     }
-    const dbResult = await updateUser(id, req.body, uploadResult?.secure_url);
+    const dbResult = await updateUser(req.body, id, uploadResult?.secure_url);
     if (dbResult.rowCount === 0) {
       return res.status(404).json({
-        msg: "error",
-        err: "User not found",
+        msg: "User not found",
+        data: [],
       });
     }
     return res.status(200).json({
       msg: "success",
       data: dbResult.rows,
     });
-  } catch (err: unknown) {
+  } catch (err) {
     if (err instanceof Error) {
-      console.log(err.message);
+      if (/(invalid(.)+id(.)+)/g.test(err.message)) {
+        return res.status(401).json({
+          msg: "Error",
+          err: "User tidak ditemukan",
+        });
+      }
     }
     return res.status(500).json({
       msg: "Error",

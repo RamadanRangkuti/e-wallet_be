@@ -1,8 +1,7 @@
-import { Request, Response } from 'express';
-import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from '../repositories/transaction.repo';
-import { ITopUpData, ITransactionParams, ITransferData } from '../models/transaction.model';
-import { ITransactionResponse } from '../models/response.model';
-
+import { Request, Response } from "express";
+import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from "../repositories/transaction.repo";
+import { ITopUpData, ITransactionParams, ITransferData } from "../models/transaction.model";
+import { ITransactionResponse } from "../models/response.model";
 
 export const getTransactions = async (req: Request<ITransactionParams>, res: Response<ITransactionResponse>) => {
   const { id } = req.params;
@@ -10,7 +9,7 @@ export const getTransactions = async (req: Request<ITransactionParams>, res: Res
 
   try {
     const result = await getTransactionsByUser(id, searchQuery);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         msg: "No transactions found for this user",
@@ -73,7 +72,7 @@ export const makeTransfer = async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof Error) {
       console.error(err.message);
-      if (err.message === 'Your balance is not enough, please top up!') {
+      if (err.message === "Your balance is not enough, please top up!") {
         return res.status(400).json({
           msg: "Error",
           err: "Your balance is not enough, please top up!",
@@ -87,48 +86,48 @@ export const makeTransfer = async (req: Request, res: Response) => {
   }
 };
 
-  // Handler to perform a top-up
+// Handler to perform a top-up
 export const makeTopUp = async (req: Request, res: Response) => {
-    const topUp: ITopUpData = req.body;
-    try {
-      const result = await performTopUp(topUp);
-      return res.status(201).json({
-        msg: "Top-Up Successful",
-        transactionId: result.transactionId,
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      }
-      return res.status(500).json({
-        msg: "Error",
-        err: "Internal Server Error",
-      });
+  const topUp: ITopUpData = req.body;
+  try {
+    const result = await performTopUp(topUp);
+    return res.status(201).json({
+      msg: "Top-Up Successful",
+      transactionId: result.transactionId,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
     }
-  };
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
 
-  // Handler to get balance for last 7 days
+// Handler to get balance for last 7 days
 export const getBalanceForLast7DaysHandler = async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id);
-    try {
-      const result = await getBalanceForLast7Days(id);
-      if (result.rows.length === 0) {
-        return res.status(404).json({
-          msg: "No Data Found",
-          data: [],
-        });
-      }
-      return res.status(200).json({
-        msg: "Success",
-        data: result.rows,
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      }
-      return res.status(500).json({
-        msg: "Error",
-        err: "Internal Server Error",
+  const id = parseInt(req.params.id);
+  try {
+    const result = await getBalanceForLast7Days(id);
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        msg: "No Data Found",
+        data: [],
       });
     }
-  };
+    return res.status(200).json({
+      msg: "Success",
+      data: result.rows,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};

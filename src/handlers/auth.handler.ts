@@ -39,7 +39,7 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
     if (!result.rows.length) throw new Error("Username or password is wrong!!!");
     const { password: hash, id } = result.rows[0];
-    console.log(hash)
+    console.log(hash);
     const isValid = await bcrypt.compare(password, hash);
     if (!isValid) throw new Error("Username or password is wrong!!!");
 

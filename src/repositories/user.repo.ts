@@ -27,7 +27,7 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   // }
 
   if (conditions.length > 0) {
-    query += ` WHERE ${conditions.join(' AND ')}`;
+    query += ` WHERE ${conditions.join(" AND ")}`;
   }
 
   switch (sortBy) {
@@ -60,8 +60,7 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   return db.query(query, values);
 };
 
-
-export const getTotalUser = async ({ fullname = '' }: IUserQuery): Promise<{ rows: { total_user: string }[] }> => {
+export const getTotalUser = async ({ fullname = "" }: IUserQuery): Promise<{ rows: { total_user: string }[] }> => {
   let query = `SELECT COUNT(*) as total_user FROM users`;
   const values: any[] = [];
 
@@ -76,8 +75,6 @@ export const getTotalUser = async ({ fullname = '' }: IUserQuery): Promise<{ row
   return db.query(query, values);
 };
 
-
-
 export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {
   let query = `SELECT fullname, email, balance, phone, image, password, pin FROM users WHERE id=$1`;
   const value = [id];
@@ -91,7 +88,7 @@ export const addUser = (body: IBody): Promise<QueryResult<IUser>> => {
   return db.query(query, values);
 };
 
-export const updateUser = (id: string, body: IBody, imgUrl?: string): Promise<QueryResult<IUser>> => {
+export const updateUser = (body: IBody, id: string, imgUrl?: string): Promise<QueryResult<IUser>> => {
   let query = `UPDATE users SET `;
   let fields: string[] = [];
   let values: (string | number | null)[] = [];
