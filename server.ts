@@ -2,23 +2,24 @@ import express, { Request, Response } from "express";
 import cors, { CorsOptions } from "cors";
 import * as dotenv from "dotenv";
 import morgan from "morgan";
+const app = express();
 
+app.use(cors())
 dotenv.config();
 
 import router from "./src/routes";
 
-const app = express();
+// const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-const configs: CorsOptions = {
-  origin: ["*"],
-  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-  preflightContinue: false,
-  allowedHeaders: ["Authorization", "x-headers", "content-type"]
-};
-app.use(cors(configs));
+// const configs: CorsOptions = {
+//   origin: ["*"],
+//   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+//   preflightContinue: false,
+//   allowedHeaders: ["Authorization", "x-headers", "content-type"]
+// };
+// app.use(cors(configs));
 
 //logger
 const logger = morgan("dev");
