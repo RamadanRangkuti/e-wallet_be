@@ -3,11 +3,10 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import { AppParams } from "../models/params";
 import { IAuthResponse } from "../models/response.model";
 
-
 export const jwtOptions: SignOptions = {
   expiresIn: "1d",
-  issuer: process.env.JWT_ISSUER
-}
+  issuer: process.env.JWT_ISSUER,
+};
 
 export const authorization = (req: Request<AppParams>, res: Response<IAuthResponse>, next: NextFunction) => {
   const bearerToken = req.header("Authorization");
@@ -15,8 +14,8 @@ export const authorization = (req: Request<AppParams>, res: Response<IAuthRespon
   if (!bearerToken) {
     return res.status(403).json({
       msg: "Forbidden",
-      err: "Don't Have access"
-    })
+      err: "Don't Have access",
+    });
   }
   const token = bearerToken.split(" ")[1];
 
@@ -24,10 +23,10 @@ export const authorization = (req: Request<AppParams>, res: Response<IAuthRespon
     if (err) {
       return res.status(403).json({
         msg: err.message,
-        err: err.name
-      })
+        err: err.name,
+      });
     }
-    req.userPayload = payload
+    req.userPayload = payload;
     next();
-  })
-}
+  });
+};

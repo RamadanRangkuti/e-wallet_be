@@ -1,6 +1,5 @@
 import { Pool, PoolConfig } from "pg";
 
-
 const config: PoolConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
