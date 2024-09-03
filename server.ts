@@ -23,7 +23,7 @@ const configs = {
 };
 
 app.use(cors(configs));
-app.options('', cors(configs));
+app.options('*', cors(configs));
 
 //logger
 const logger = morgan("dev");
