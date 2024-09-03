@@ -2,21 +2,28 @@ import express, { Request, Response } from "express";
 import cors, { CorsOptions } from "cors";
 import * as dotenv from "dotenv";
 import morgan from "morgan";
+const app = express();
 
+app.use(cors())
 dotenv.config();
 
 import router from "./src/routes";
 
-const app = express();
+// const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(cors());
-// const configs: CorsOptions = {
-//   origin: ["http://localhost:8080", "https://e-wallet-fe-pi.vercel.app/"],
-//   methods: ["POST", "PATCH"],
-//   allowedHeaders: ["Authorization", "x-headers", "Content-Type"],
+// const configs = {
+//   origin: "*",
+//   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204,
+//   allowedHeaders: ["Authorization", "x-headers", "content-type"],
+//   maxAge: 0
 // };
+
+// app.use(cors(configs));
+// app.options('*', cors(configs));
 
 //logger
 const logger = morgan("dev");
