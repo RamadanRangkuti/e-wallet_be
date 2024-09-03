@@ -53,24 +53,25 @@ export const performTransfer = async (transfer: ITransferData): Promise<{ transa
     VALUES ('Transfer', 'Success') 
     RETURNING id
   `;
-  
+
   const insertTransferQuery = `
     INSERT INTO transfers (transaction_id, sender_id, receiver_id, amount, notes) 
     VALUES ($1, $2, $3, $4, $5)
   `;
-  
+
   const updateSenderBalanceQuery = `
     UPDATE users SET balance = balance - $1 WHERE id = $2
   `;
-  
+
   const updateReceiverBalanceQuery = `
     UPDATE users SET balance = balance + $1 WHERE id = $2
   `;
-  
+
   const getSenderBalanceQuery = `
     SELECT balance FROM users WHERE id = $1
   `;
-  
+
+
   try {
     await db.query('BEGIN');
 
@@ -84,13 +85,13 @@ export const performTransfer = async (transfer: ITransferData): Promise<{ transa
 
     const transactionResult = await db.query(insertTransactionQuery);
     const transactionId = transactionResult.rows[0].id;
-    
+
     await db.query(insertTransferQuery, [transactionId, sender_id, receiver_id, amount, notes]);
     await db.query(updateSenderBalanceQuery, [amount, sender_id]);
     await db.query(updateReceiverBalanceQuery, [amount, receiver_id]);
-    
+
     await db.query('COMMIT');
-    
+
     return { transactionId };
   } catch (error) {
     await db.query('ROLLBACK');
@@ -105,34 +106,34 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
     VALUES ('Topup', 'Success') 
     RETURNING id
   `;
-  
+
   const insertTopUpQuery = `
     INSERT INTO top_ups (transaction_id, user_id, payment_id, amount, admin, total_amount) 
     VALUES ($1, $2, $3, $4, $5, $6)
   `;
-  
+
   const updateUserBalanceQuery = `
     UPDATE users SET balance = balance + $1 WHERE id = $2
   `;
-  
+
   const { user_id, payment_id, amount, admin = 0 } = topUp; // Default admin to 0 if not provided
   const totalAmount = amount + admin; // Calculate total amount including admin
 
   try {
     await db.query('BEGIN');
-    
+
     // Insert transaction and get transaction ID
     const transactionResult = await db.query(insertTransactionQuery);
     const transactionId = transactionResult.rows[0].id;
-    
+
     // Insert top-up details
     await db.query(insertTopUpQuery, [transactionId, user_id, payment_id, amount, admin, totalAmount]);
-    
+
     // Update user balance
     await db.query(updateUserBalanceQuery, [amount, user_id]);
-    
+
     await db.query('COMMIT');
-    
+
     return { transactionId };
   } catch (error) {
     await db.query('ROLLBACK');
@@ -140,9 +141,9 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
   }
 };
 
-  // Get balance for the last 7 days
+// Get balance for the last 7 days
 export const getBalanceForLast7Days = (id: number): Promise<QueryResult<IDataTransaction>> => {
-    const query = `
+  const query = `
         WITH date_series AS (
             SELECT generate_series(
                 date_trunc('day', NOW() - INTERVAL '6 days'), 
@@ -174,7 +175,7 @@ export const getBalanceForLast7Days = (id: number): Promise<QueryResult<IDataTra
         LEFT JOIN transactions_summary ts ON ds.date = ts.date
         ORDER BY ds.date;
     `;
-  
-    const values = [id];
-    return db.query(query, values);
-  };
+
+  const values = [id];
+  return db.query(query, values);
+};
