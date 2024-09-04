@@ -202,6 +202,7 @@ export const updatedPin = async (req: Request<IParams, {}, IBody>, res: Response
       data: result.rows,
     });
   } catch (err) {
+    console.log(err);
     if (err instanceof Error) {
       console.log(err.message);
     }
