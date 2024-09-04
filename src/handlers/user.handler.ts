@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
+import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass, updatePin } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response.model";
@@ -118,7 +118,6 @@ export const update = async (req: Request<{ id: string }, {}, IBody>, res: Respo
       const { result, error } = await cloudinaryUploader(req, "user", id);
       uploadResult = result;
       if (error) throw error;
-      // console.log("Upload Result:", uploadResult);
     }
     const dbResult = await updateUser(req.body, id, uploadResult?.secure_url);
     if (dbResult.rowCount === 0) {
@@ -196,14 +195,14 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
   }
 };
 
-export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
+export const updatedPin = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
   const { pin } = req.body;
 
   try {
     const salt = await bcrypt.genSalt();
     const hashedPin = await bcrypt.hash(<string>pin, salt);
-    const result = await updatePass(id, hashedPin);
+    const result = await updatePin(id, hashedPin);
 
     return res.status(200).json({
       msg: "success",
