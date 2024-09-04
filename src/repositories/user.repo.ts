@@ -137,6 +137,12 @@ export const updatePass = (id: string, hashedPassword: string): Promise<QueryRes
   return db.query(query, values);
 };
 
+export const deleteImage = (id: string): Promise<QueryResult<IUser>> => {
+  const query = `UPDATE users SET image = NULL WHERE id = $2 RETURNING *`;
+  const values = [id];
+  return db.query(query, values);
+};
+
 export const deleteUser = (id: string): Promise<QueryResult<IUser>> => {
   const query = `DELETE FROM users WHERE id=$1 returning *`;
   const value = [id];
