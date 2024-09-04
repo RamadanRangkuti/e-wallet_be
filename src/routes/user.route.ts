@@ -10,9 +10,9 @@ const router = Router();
 router.get("/", getUser);
 router.get("/:id", authorization, getDetail);
 router.post("/", singleUploader("image"), add);
-router.patch("/:id", singleCloudUploader("image"), update);
+router.put("/:id", singleCloudUploader("image"), update);
 router.delete("/:id", remove);
-router.patch("/editpassword/:id", updatePassword);
-router.patch("/editpin/:id", updatedPin);
+router.put("/editpassword/:id", updatePassword);
+router.put("/editpin/:id", updatedPin);
 
 export default router;
