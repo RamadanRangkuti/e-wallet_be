@@ -109,10 +109,9 @@ export const add = async (req: Request<{}, {}, IBody>, res: Response) => {
 };
 
 export const update = async (req: Request<{ id: string }, {}, IBody>, res: Response) => {
-  const { id } = req.params;
-  const { file } = req;
-
   try {
+    const { id } = req.params;
+    const { file } = req;
     let uploadResult: UploadApiResponse | undefined;
     if (file) {
       const { result, error } = await cloudinaryUploader(req, "user", id);
