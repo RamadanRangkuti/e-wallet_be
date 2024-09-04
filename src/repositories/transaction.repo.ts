@@ -1,6 +1,6 @@
 import db from "../../src/configs/connection";
-import { QueryResult } from 'pg';
-import { IDataTransaction, ITopUpData, ITransferData } from '../models/transaction.model';
+import { QueryResult } from "pg";
+import { IDataTransaction, ITopUpData, ITransferData } from "../models/transaction.model";
 
 export const getTransactionsByUser = (id: number, searchQuery?: string): Promise<QueryResult<IDataTransaction>> => {
   let query = `
@@ -43,7 +43,6 @@ export const getTransactionsByUser = (id: number, searchQuery?: string): Promise
   return db.query(query, values);
 };
 
-
 // Perform a transfer
 export const performTransfer = async (transfer: ITransferData): Promise<{ transactionId: number }> => {
   const { sender_id, receiver_id, amount, notes } = transfer;
@@ -71,16 +70,15 @@ export const performTransfer = async (transfer: ITransferData): Promise<{ transa
     SELECT balance FROM users WHERE id = $1
   `;
 
-
   try {
-    await db.query('BEGIN');
+    await db.query("BEGIN");
 
     // Check sender balance
     const senderBalanceResult = await db.query(getSenderBalanceQuery, [sender_id]);
     const senderBalance = senderBalanceResult.rows[0].balance;
 
-    if (senderBalance < amount || (senderBalance - amount) < 0) {
-      throw new Error('Your balance is not enough, please top up!');
+    if (senderBalance < amount || senderBalance - amount < 0) {
+      throw new Error("Your balance is not enough, please top up!");
     }
 
     const transactionResult = await db.query(insertTransactionQuery);
@@ -90,11 +88,11 @@ export const performTransfer = async (transfer: ITransferData): Promise<{ transa
     await db.query(updateSenderBalanceQuery, [amount, sender_id]);
     await db.query(updateReceiverBalanceQuery, [amount, receiver_id]);
 
-    await db.query('COMMIT');
+    await db.query("COMMIT");
 
     return { transactionId };
   } catch (error) {
-    await db.query('ROLLBACK');
+    await db.query("ROLLBACK");
     throw error;
   }
 };
@@ -120,7 +118,7 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
   const totalAmount = amount + admin; // Calculate total amount including admin
 
   try {
-    await db.query('BEGIN');
+    await db.query("BEGIN");
 
     // Insert transaction and get transaction ID
     const transactionResult = await db.query(insertTransactionQuery);
@@ -132,11 +130,11 @@ export const performTopUp = async (topUp: ITopUpData): Promise<{ transactionId: 
     // Update user balance
     await db.query(updateUserBalanceQuery, [amount, user_id]);
 
-    await db.query('COMMIT');
+    await db.query("COMMIT");
 
     return { transactionId };
   } catch (error) {
-    await db.query('ROLLBACK');
+    await db.query("ROLLBACK");
     throw error;
   }
 };

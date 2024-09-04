@@ -4,3 +4,5 @@ import { ITransactionParams } from "./transaction.model";
 
 export type AppParams = ParamsDictionary | IParams | ITransactionParams;
 export type QueryUserParams = IUserQuery;
+
+export type CloudParams = ParamsDictionary;

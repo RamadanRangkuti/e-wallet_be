@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass } from "../repositories/user.repo";
+import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass, updatePin } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
 import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response.model";
@@ -115,24 +115,29 @@ export const update = async (req: Request<{ id: string }, {}, IBody>, res: Respo
   try {
     let uploadResult: UploadApiResponse | undefined;
     if (file) {
-      const { result, error } = await cloudinaryUploader(req, "user", id as string);
+      const { result, error } = await cloudinaryUploader(req, "user", id);
       uploadResult = result;
       if (error) throw error;
     }
-    const dbResult = await updateUser(id, req.body, uploadResult?.secure_url);
+    const dbResult = await updateUser(req.body, id, uploadResult?.secure_url);
     if (dbResult.rowCount === 0) {
       return res.status(404).json({
-        msg: "error",
-        err: "User not found",
+        msg: "User not found",
+        data: [],
       });
     }
     return res.status(200).json({
       msg: "success",
       data: dbResult.rows,
     });
-  } catch (err: unknown) {
+  } catch (err) {
     if (err instanceof Error) {
-      console.log(err.message);
+      if (/(invalid(.)+id(.)+)/g.test(err.message)) {
+        return res.status(401).json({
+          msg: "Error",
+          err: "User tidak ditemukan",
+        });
+      }
     }
     return res.status(500).json({
       msg: "Error",
@@ -190,20 +195,22 @@ export const updatePassword = async (req: Request<IParams, {}, IBody>, res: Resp
   }
 };
 
-export const updatePin = async (req: Request<IParams, {}, IBody>, res: Response) => {
+export const updatedPin = async (req: Request<IParams, {}, IBody>, res: Response) => {
   const { id } = req.params;
   const { pin } = req.body;
+  console.log(pin);
 
   try {
     const salt = await bcrypt.genSalt();
     const hashedPin = await bcrypt.hash(<string>pin, salt);
-    const result = await updatePass(id, hashedPin);
+    const result = await updatePin(id, hashedPin);
 
     return res.status(200).json({
       msg: "success",
       data: result.rows,
     });
   } catch (err) {
+    console.log(err);
     if (err instanceof Error) {
       console.log(err.message);
     }

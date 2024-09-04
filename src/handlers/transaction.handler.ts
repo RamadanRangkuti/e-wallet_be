@@ -1,8 +1,7 @@
-import { Request, Response } from 'express';
-import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from '../repositories/transaction.repo';
-import { ITopUpData, ITransactionParams, ITransferData } from '../models/transaction.model';
-import { ITransactionResponse } from '../models/response.model';
-
+import { Request, Response } from "express";
+import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from "../repositories/transaction.repo";
+import { ITopUpData, ITransactionParams, ITransferData } from "../models/transaction.model";
+import { ITransactionResponse } from "../models/response.model";
 
 export const getTransactions = async (req: Request<ITransactionParams>, res: Response<ITransactionResponse>) => {
   const { id } = req.params;
@@ -73,7 +72,7 @@ export const makeTransfer = async (req: Request, res: Response) => {
   } catch (err) {
     if (err instanceof Error) {
       console.error(err.message);
-      if (err.message === 'Your balance is not enough, please top up!') {
+      if (err.message === "Your balance is not enough, please top up!") {
         return res.status(400).json({
           msg: "Error",
           err: "Your balance is not enough, please top up!",

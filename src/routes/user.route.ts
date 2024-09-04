@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { singleCloudUploader, singleUploader } from "../middlewares/upload";
 
-import { getUser, getDetail, add, update, remove, updatePassword, updatePin } from "../handlers/user.handler";
+import { getUser, getDetail, add, update, remove, updatePassword, updatedPin } from "../handlers/user.handler";
 import { authorization } from "../middlewares/authorization";
 
 const router = Router();
@@ -13,6 +13,6 @@ router.post("/", singleUploader("image"), add);
 router.put("/:id", singleCloudUploader("image"), update);
 router.delete("/:id", remove);
 router.put("/editpassword/:id", updatePassword);
-router.put("/editpin/:id", updatePin);
+router.put("/editpin/:id", updatedPin);
 
 export default router;

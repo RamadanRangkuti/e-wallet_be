@@ -53,3 +53,8 @@ export interface ILoginBody {
   email: string;
   password: string;
 }
+
+export interface IPinAuth {
+  id: string;
+  pin: string;
+}
