@@ -5,14 +5,11 @@ import { ILoginBody, IPinAuth, IRegisterBody } from "../models/user.model";
 import { loginUser, pinAuth, registerUser } from "../repositories/auth.repo";
 import { IAuthResponse, IBasicResponse } from "../models/response.model";
 import { IPayload } from "../models/payload.model";
-// import { IAuthResponse, IUserResponse } from "../models/response.model";
-// import { IPayload } from "../models/payload.model";
 import { jwtOptions } from "../middlewares/authorization";
 
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
-  const { password } = req.body;
   try {
-    const { password, pin } = req.body;
+    const { password } = req.body;
     const salt = await bcrypt.genSalt();
     const hashedPw = await bcrypt.hash(password, salt);
     const result = await registerUser(req.body, hashedPw);
@@ -33,6 +30,7 @@ export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Res
 
 export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
   try {
+    const { email, password } = req.body;
     const result = await loginUser(email);
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
     if (!result.rows.length) throw new Error("Username or password is wrong!!!");
@@ -73,7 +71,7 @@ export const authPin = async (req: Request<{}, {}, IPinAuth, {}>, res: Response<
     if (!isValid) throw new Error("Wrong Pin!!!");
 
     return res.status(200).json({
-      msg: `Success`
+      msg: `Success`,
     });
   } catch (err) {
     if (err instanceof Error) {
