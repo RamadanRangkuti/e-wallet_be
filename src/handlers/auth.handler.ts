@@ -5,8 +5,6 @@ import { ILoginBody, IPinAuth, IRegisterBody } from "../models/user.model";
 import { loginUser, pinAuth, registerUser } from "../repositories/auth.repo";
 import { IAuthResponse, IBasicResponse } from "../models/response.model";
 import { IPayload } from "../models/payload.model";
-// import { IAuthResponse, IUserResponse } from "../models/response.model";
-// import { IPayload } from "../models/payload.model";
 import { jwtOptions } from "../middlewares/authorization";
 
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
@@ -34,6 +32,7 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
   const { email, password } = req.body
 
   try {
+    const { email, password } = req.body;
     const result = await loginUser(email);
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
     if (!result.rows.length) throw new Error("Username or password is wrong!!!");
@@ -74,7 +73,7 @@ export const authPin = async (req: Request<{}, {}, IPinAuth, {}>, res: Response<
     if (!isValid) throw new Error("Wrong Pin!!!");
 
     return res.status(200).json({
-      msg: `Success`
+      msg: `Success`,
     });
   } catch (err) {
     if (err instanceof Error) {
