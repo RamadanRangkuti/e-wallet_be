@@ -61,6 +61,7 @@ export const getUserTransactions = async (req: Request, res: Response) => {
 export const makeTransfer = async (req: Request, res: Response) => {
   try {
     const transfer: ITransferData = req.body;
+    console.log(transfer);
     const result = await performTransfer(transfer);
     return res.status(201).json({
       msg: "Transfer Successful",

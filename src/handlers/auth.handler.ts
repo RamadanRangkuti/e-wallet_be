@@ -10,9 +10,8 @@ import { IPayload } from "../models/payload.model";
 import { jwtOptions } from "../middlewares/authorization";
 
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
-  const { password } = req.body;
   try {
-    const { password, pin } = req.body;
+    const { password } = req.body;
     const salt = await bcrypt.genSalt();
     const hashedPw = await bcrypt.hash(password, salt);
     const result = await registerUser(req.body, hashedPw);
@@ -32,6 +31,8 @@ export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Res
 };
 
 export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
+  const { email, password } = req.body
+
   try {
     const result = await loginUser(email);
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
