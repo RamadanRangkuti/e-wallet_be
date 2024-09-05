@@ -9,10 +9,10 @@ const router = Router();
 
 router.get("/", getUser);
 router.get("/:id", authorization, getDetail);
-router.post("/", singleUploader("image"), add);
+router.post("/", authorization, singleUploader("image"), add);
 router.put("/:id", authorization, singleCloudUploader("image"), update);
 router.delete("/image/:id", authorization, removeImage);
-router.delete("/:id", remove);
+router.delete("/:id", authorization, remove);
 router.put("/editpassword/:id", authorization, updatePassword);
 router.put("/editpin/:id", authorization, updatedPin);
 
