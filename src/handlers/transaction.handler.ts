@@ -4,10 +4,9 @@ import { ITopUpData, ITransactionParams, ITransferData } from "../models/transac
 import { ITransactionResponse } from "../models/response.model";
 
 export const getTransactions = async (req: Request<ITransactionParams>, res: Response<ITransactionResponse>) => {
-  const { id } = req.params;
-  const searchQuery = req.query.search as string;
-
   try {
+    const { id } = req.params;
+    const searchQuery = req.query.search as string;
     const result = await getTransactionsByUser(id, searchQuery);
 
     if (result.rows.length === 0) {
@@ -32,11 +31,10 @@ export const getTransactions = async (req: Request<ITransactionParams>, res: Res
   }
 };
 
-// Handler to get transactions by user
 export const getUserTransactions = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId);
-  const searchQuery = req.query.search as string | undefined;
   try {
+    const userId = parseInt(req.params.userId);
+    const searchQuery = req.query.search as string | undefined;
     const result = await getTransactionsByUser(userId, searchQuery);
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -61,9 +59,9 @@ export const getUserTransactions = async (req: Request, res: Response) => {
 
 // Handler to perform a transfer
 export const makeTransfer = async (req: Request, res: Response) => {
-  const transfer: ITransferData = req.body;
-
   try {
+    const transfer: ITransferData = req.body;
+    console.log(transfer);
     const result = await performTransfer(transfer);
     return res.status(201).json({
       msg: "Transfer Successful",
@@ -88,8 +86,8 @@ export const makeTransfer = async (req: Request, res: Response) => {
 
 // Handler to perform a top-up
 export const makeTopUp = async (req: Request, res: Response) => {
-  const topUp: ITopUpData = req.body;
   try {
+    const topUp: ITopUpData = req.body;
     const result = await performTopUp(topUp);
     return res.status(201).json({
       msg: "Top-Up Successful",
@@ -108,8 +106,8 @@ export const makeTopUp = async (req: Request, res: Response) => {
 
 // Handler to get balance for last 7 days
 export const getBalanceForLast7DaysHandler = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
   try {
+    const id = parseInt(req.params.id);
     const result = await getBalanceForLast7Days(id);
     if (result.rows.length === 0) {
       return res.status(404).json({

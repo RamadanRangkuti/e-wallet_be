@@ -45,11 +45,15 @@ export interface IUserQuery {
 
 export interface IRegisterBody extends IBody {
   password: string;
-  pin: string;
 }
 
 export interface ILoginBody {
   id: string;
   email: string;
   password: string;
+}
+
+export interface IPinAuth {
+  id: string;
+  pin: string;
 }

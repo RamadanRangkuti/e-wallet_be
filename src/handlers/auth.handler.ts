@@ -1,21 +1,18 @@
 import { Request, Response } from "express-serve-static-core";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { ILoginBody, IRegisterBody } from "../models/user.model";
-import { loginUser, registerUser } from "../repositories/auth.repo";
-import { IAuthResponse } from "../models/response.model";
+import { ILoginBody, IPinAuth, IRegisterBody } from "../models/user.model";
+import { loginUser, pinAuth, registerUser } from "../repositories/auth.repo";
+import { IAuthResponse, IBasicResponse } from "../models/response.model";
 import { IPayload } from "../models/payload.model";
-// import { IAuthResponse, IUserResponse } from "../models/response.model";
-// import { IPayload } from "../models/payload.model";
 import { jwtOptions } from "../middlewares/authorization";
 
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
-  const { password, pin } = req.body;
   try {
+    const { password } = req.body;
     const salt = await bcrypt.genSalt();
     const hashedPw = await bcrypt.hash(password, salt);
-    const hashedPin = await bcrypt.hash(pin, salt);
-    const result = await registerUser(req.body, hashedPw, hashedPin);
+    const result = await registerUser(req.body, hashedPw);
     return res.status(201).json({
       msg: "Success",
       data: result.rows,
@@ -32,14 +29,14 @@ export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Res
 };
 
 export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body
+
   try {
-    console.log(req.body.password);
+    const { email, password } = req.body;
     const result = await loginUser(email);
     if (email.length <= 0 || password.length <= 0) throw new Error("Email or Password required!!!");
     if (!result.rows.length) throw new Error("Username or password is wrong!!!");
     const { password: hash, id } = result.rows[0];
-    console.log(hash);
     const isValid = await bcrypt.compare(password, hash);
     if (!isValid) throw new Error("Username or password is wrong!!!");
 
@@ -54,6 +51,33 @@ export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<
     });
   } catch (err) {
     if (err instanceof Error) {
+      return res.status(401).json({
+        msg: "Error",
+        err: err.message,
+      });
+    }
+    return res.status(500).json({
+      msg: "Error",
+      err: "Internal Server Error",
+    });
+  }
+};
+
+export const authPin = async (req: Request<{}, {}, IPinAuth, {}>, res: Response<IBasicResponse>) => {
+  const { id, pin } = req.body;
+  try {
+    const result = await pinAuth(id);
+    if (!pin) throw new Error("Pin is required!!!");
+    const { pin: hash } = result.rows[0];
+    const isValid = await bcrypt.compare(pin, hash);
+    if (!isValid) throw new Error("Wrong Pin!!!");
+
+    return res.status(200).json({
+      msg: `Success`,
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err);
       return res.status(401).json({
         msg: "Error",
         err: err.message,
