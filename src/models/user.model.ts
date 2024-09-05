@@ -45,7 +45,6 @@ export interface IUserQuery {
 
 export interface IRegisterBody extends IBody {
   password: string;
-  pin: string;
 }
 
 export interface ILoginBody {

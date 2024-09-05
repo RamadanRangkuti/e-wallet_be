@@ -33,6 +33,8 @@ export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Res
 };
 
 export const login = async (req: Request<{}, {}, ILoginBody, {}>, res: Response<IAuthResponse>) => {
+  const { email, password } = req.body
+
   try {
     const { email, password } = req.body;
     const result = await loginUser(email);
