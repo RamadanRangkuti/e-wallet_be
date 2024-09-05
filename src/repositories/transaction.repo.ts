@@ -40,6 +40,8 @@ export const getTransactionsByUser = (id: number, searchQuery?: string): Promise
     values.push(`%${searchQuery}%`);
   }
 
+  query += ` ORDER BY t.created_at DESC`;
+
   return db.query(query, values);
 };
 
