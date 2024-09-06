@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { addUser, deleteUser, getDetailUser, getAllUsers, getTotalUser, updateUser, updatePass, updatePin, deleteImage } from "../repositories/user.repo";
 import { IParams, IBody } from "../models/user.model";
-import getUserLink from "../helpers/getUserLink";
+// import getUserLink from "../helpers/getUserLink";
 import { IUserResponse } from "../models/response.model";
 import { IUserQuery } from "../models/user.model";
 import { UploadApiResponse } from "cloudinary";
 import { cloudinaryUploader } from "../helpers/cloudinary";
+import getLink from "../helpers/getLink";
 
 // export const get = async (req: Request, res: Response) => {
 //   try {
@@ -24,6 +25,9 @@ import { cloudinaryUploader } from "../helpers/cloudinary";
 // };
 export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Response<IUserResponse>) => {
   try {
+    const limit = 8;
+    const page = parseInt((req.query.page as string) || "1", 10);
+
     const result = await getAllUsers(req.query);
     if (result.rowCount === 0) {
       return res.status(404).json({
@@ -33,13 +37,9 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
     }
 
     const dataUser = await getTotalUser(req.query);
-    console.log(dataUser.rows);
-    const page = parseInt((req.query.page as string) || "1");
-    const totalData = parseInt(dataUser.rows[0].total_user);
-    const totalPage = Math.ceil(totalData / 8);
-
-    console.log(req.query);
-
+    const totalData = parseInt(dataUser.rows[0].total_user, 10);
+    const totalPage = Math.ceil(totalData / limit);
+    
     return res.status(200).json({
       msg: "Success",
       data: result.rows,
@@ -47,18 +47,24 @@ export const getUser = async (req: Request<{}, {}, {}, IUserQuery>, res: Respons
         totalData,
         totalPage,
         page,
-        prevLink: page > 1 ? getUserLink(req, "previous") : null,
-        nextLink: page != totalPage ? getUserLink(req, "next") : null,
+        prevLink: page > 1 ? getLink(req, "previous") : null,
+        nextLink: page < totalPage ? getLink(req, "next") : null,
       },
     });
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
+      return res.status(500).json({
+        msg: "Error",
+        err: err.message, // Properly access the error message
+      });
+    } else {
+      console.log('An unknown error occurred');
+      return res.status(500).json({
+        msg: "Error",
+        err: "An unknown error occurred",
+      });
     }
-    return res.status(500).json({
-      msg: "Error",
-      err: "Internal Server Error",
-    });
   }
 };
 

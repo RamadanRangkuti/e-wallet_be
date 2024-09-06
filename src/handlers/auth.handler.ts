@@ -10,6 +10,7 @@ import { jwtOptions } from "../middlewares/authorization";
 export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Response) => {
   try {
     const { password } = req.body;
+    if (password.length != null && password.length < 8) throw new Error("Password cannot be empty & Your password must be at least 8 characters");
     const salt = await bcrypt.genSalt();
     const hashedPw = await bcrypt.hash(password, salt);
     const result = await registerUser(req.body, hashedPw);
@@ -19,7 +20,10 @@ export const register = async (req: Request<{}, {}, IRegisterBody, {}>, res: Res
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error.message);
+      return res.status(400).json({
+        msg: "Error",
+        err: error.message,
+      });
     }
     return res.status(500).json({
       msg: "Error",
