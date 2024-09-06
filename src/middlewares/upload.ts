@@ -21,7 +21,7 @@ const multerMemory = memoryStorage();
 const multerOptions = (storageEngine: StorageEngine): Options => ({
   storage: storageEngine,
   limits: {
-    fileSize: 1048576 * 10, // 10mb
+    fileSize: 1048576 * 1, // 10mb
   },
   fileFilter: (req, file, cb) => {
     const allowedExtRe = /\.(jpg|png|jpeg|webp)$/i;
