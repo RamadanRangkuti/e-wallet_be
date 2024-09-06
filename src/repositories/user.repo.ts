@@ -3,7 +3,7 @@ import db from "../configs/connection";
 import { IUser, IBody, IUserQuery } from "../models/user.model";
 
 export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
-  let query = `SELECT id, fullname, email, phone, balance FROM users`;
+  let query = `SELECT id, fullname, email, phone, balance, image FROM users`;
   const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
   const values: any[] = [];
   const conditions: string[] = [];
@@ -25,6 +25,9 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   //   conditions.push(`phone = $${values.length + 1}`);
   //   values.push(phone);
   // }
+
+  conditions.push(`fullname IS NOT NULL`);
+  conditions.push(`phone IS NOT NULL`);
 
   if (conditions.length > 0) {
     query += ` WHERE ${conditions.join(" AND ")}`;
