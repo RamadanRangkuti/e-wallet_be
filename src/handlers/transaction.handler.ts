@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { getBalanceForLast7Days, getTransactionsByUser, performTopUp, performTransfer } from "../repositories/transaction.repo";
 import { ITopUpData, ITransactionParams, ITransferData } from "../models/transaction.model";
 import { ITransactionResponse, IPaginationMeta } from "../models/response.model";
-import getTransactionLink from "../helpers/getTransactionLink";
+// import getTransactionLink from "../helpers/getTransactionLink";
+import getLink from "../helpers/getLink";
 
 export const getTransactions = async (req: Request<ITransactionParams>, res: Response<ITransactionResponse>) => {
   try {
@@ -33,8 +34,8 @@ export const getTransactions = async (req: Request<ITransactionParams>, res: Res
     // const totalData: number = result.rowCount || 0;
     // const totalPage = Math.ceil(totalData / limit);
 
-    const nextLink = page < totalPage ? getTransactionLink(req, "next") : null;
-    const prevLink = page > 1 ? getTransactionLink(req, "previous") : null;
+    const nextLink = page < totalPage ? getLink(req, "next") : null;
+    const prevLink = page > 1 ? getLink(req, "previous") : null;
 
     const meta: IPaginationMeta = {
       totalData,

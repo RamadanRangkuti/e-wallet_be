@@ -1,9 +1,9 @@
 import { Request } from "express-serve-static-core";
-import { AppParams } from "../models/params";
+import { AppParams, QueryUserParams } from "../models/params";
 
-const getTransactionLink = (req: Request<AppParams>, info?: "previous" | "next"): string => {
+const getLink = (req: Request<AppParams, {}, {}, QueryUserParams>, info?: "previous" | "next"): string => {
   const { path, hostname, query, protocol, baseUrl } = req;
-  
+
   const currentPage = parseInt(query.page as string) || 1;
 
   const getNewPage = (page: number, info?: "previous" | "next"): number => {
@@ -28,4 +28,4 @@ const getTransactionLink = (req: Request<AppParams>, info?: "previous" | "next")
   return `${protocol}://${hostname}:${process.env.PORT}${newUrl(baseUrl)}${newUrl(path)}?${serialize(newQuery)}`;
 };
 
-export default getTransactionLink;
+export default getLink;
