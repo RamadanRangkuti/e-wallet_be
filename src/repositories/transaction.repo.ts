@@ -1,49 +1,69 @@
-import db from "../../src/configs/connection";
-import { QueryResult } from "pg";
-import { IDataTransaction, ITopUpData, ITransferData } from "../models/transaction.model";
+  import db from "../../src/configs/connection";
+  import { QueryResult } from "pg";
+  import { IDataTransaction, ITopUpData, ITransferData } from "../models/transaction.model";
 
-export const getTransactionsByUser = (id: number, searchQuery?: string): Promise<QueryResult<IDataTransaction>> => {
-  let query = `
-    SELECT 
-      t.type,
-      t.status,
-      t.created_at,
-      t.updated_at,
-      tr.sender_id,
-      sender.image AS sender_image,
-      sender.fullname AS sender_fullname,
-      sender.phone AS sender_phone,
-      tr.receiver_id,
-      receiver.image AS receiver_image,
-      receiver.fullname AS receiver_fullname,
-      receiver.phone AS receiver_phone,
-      tr.amount AS transfer_amount,
-      tr.notes,
-      tp.user_id,
-      p.method,
-      tp.amount AS top_up_amount,
-      tp.admin,
-      tp.total_amount
-    FROM transactions t
-    LEFT JOIN transfers tr ON t.id = tr.transaction_id
-    LEFT JOIN top_ups tp ON t.id = tp.transaction_id
-    LEFT JOIN payments p ON tp.payment_id = p.id
-    LEFT JOIN users sender ON tr.sender_id = sender.id
-    LEFT JOIN users receiver ON tr.receiver_id = receiver.id
-    WHERE tr.sender_id = $1 OR tr.receiver_id = $1 OR tp.user_id = $1
-  `;
+  export const getTransactionsByUser = async (
+    id: number,
+    page: number = 1,
+    limit: number = 10,
+    searchQuery?: string
+  ): Promise<{ rows: IDataTransaction[]; totalData: number }> => {
+    let query = `
+      SELECT 
+        t.type,
+        t.status,
+        t.created_at,
+        t.updated_at,
+        tr.sender_id,
+        sender.image AS sender_image,
+        sender.fullname AS sender_fullname,
+        sender.phone AS sender_phone,
+        tr.receiver_id,
+        receiver.image AS receiver_image,
+        receiver.fullname AS receiver_fullname,
+        receiver.phone AS receiver_phone,
+        tr.amount AS transfer_amount,
+        tr.notes,
+        tp.user_id,
+        p.method,
+        tp.amount AS top_up_amount,
+        tp.admin,
+        tp.total_amount
+      FROM transactions t
+      LEFT JOIN transfers tr ON t.id = tr.transaction_id
+      LEFT JOIN top_ups tp ON t.id = tp.transaction_id
+      LEFT JOIN payments p ON tp.payment_id = p.id
+      LEFT JOIN users sender ON tr.sender_id = sender.id
+      LEFT JOIN users receiver ON tr.receiver_id = receiver.id
+      WHERE tr.sender_id = $1 OR tr.receiver_id = $1 OR tp.user_id = $1
+    `;
 
-  const values: (number | string)[] = [id];
+    const values: (number | string)[] = [id];
 
-  if (searchQuery) {
-    query += ` AND (receiver.fullname ILIKE $2 OR receiver.phone ILIKE $2 OR sender.fullname ILIKE $2 OR sender.phone ILIKE $2)`;
-    values.push(`%${searchQuery}%`);
-  }
+    if (searchQuery) {
+      query += ` AND (receiver.fullname ILIKE $2 OR receiver.phone ILIKE $2 OR sender.fullname ILIKE $2 OR sender.phone ILIKE $2)`;
+      values.push(`%${searchQuery}%`);
+    }
 
-  query += ` ORDER BY t.created_at DESC`;
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM transactions t
+      LEFT JOIN transfers tr ON t.id = tr.transaction_id
+      LEFT JOIN top_ups tp ON t.id = tp.transaction_id
+      WHERE tr.sender_id = $1 OR tr.receiver_id = $1 OR tp.user_id = $1
+    `;
 
-  return db.query(query, values);
-};
+    const countResult = await db.query(countQuery, [id]);
+    const totalData = parseInt(countResult.rows[0].total, 10);
+    
+    const offset = (page - 1) * limit;
+    query += ` ORDER BY t.created_at DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    values.push(limit, offset);
+
+    const transactions = await db.query(query, values);
+    
+    return { rows: transactions.rows, totalData };
+  };
 
 // Perform a transfer
 export const performTransfer = async (transfer: ITransferData): Promise<{ transactionId: number }> => {

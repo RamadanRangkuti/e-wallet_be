@@ -3,10 +3,16 @@ import db from "../configs/connection";
 import { IUser, IBody, IUserQuery } from "../models/user.model";
 
 export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
-  let query = `SELECT id, fullname, email, phone, balance FROM users`;
-  const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
+  const limit = 8;
+  const { fullname, page = "1", sortBy } = que;
   const values: any[] = [];
   const conditions: string[] = [];
+  
+  let query = `SELECT id, fullname, email, phone, balance, image FROM users`;
+
+  // const { fullname, min_balance, max_balance, phone, sortBy, page } = que;
+  // const values: any[] = [];
+  // const conditions: string[] = [];
 
   if (fullname) {
     conditions.push(`(fullname ILIKE $${values.length + 1} OR phone ILIKE $${values.length + 1})`);
@@ -25,6 +31,9 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   //   conditions.push(`phone = $${values.length + 1}`);
   //   values.push(phone);
   // }
+
+  conditions.push(`fullname IS NOT NULL`);
+  conditions.push(`phone IS NOT NULL`);
 
   if (conditions.length > 0) {
     query += ` WHERE ${conditions.join(" AND ")}`;
@@ -48,11 +57,9 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
       query += " ORDER BY id ASC"; // Default sorting if sortBy is not specified
       break;
   }
-
-  if (page) {
-    const offset = (parseInt(page) - 1) * 8;
-    query += ` LIMIT 8 OFFSET ${offset}`;
-  }
+  
+  const offset = (parseInt(page) - 1) * limit;
+  query += ` LIMIT ${limit} OFFSET ${offset}`;
 
   console.log("Query:", query);
   console.log("Values:", values);
@@ -60,19 +67,25 @@ export const getAllUsers = (que: IUserQuery): Promise<QueryResult<IUser>> => {
   return db.query(query, values);
 };
 
-export const getTotalUser = async ({ fullname = "" }: IUserQuery): Promise<{ rows: { total_user: string }[] }> => {
-  let query = `SELECT COUNT(*) as total_user FROM users`;
+export const getTotalUser = async ({ fullname = "" }: IUserQuery): Promise<{ rowCount: number; rows: { total_user: string }[] }> => {
+  let query = `SELECT COUNT(*) as total_user FROM users WHERE fullname IS NOT NULL AND phone IS NOT NULL`;
   const values: any[] = [];
 
   if (fullname) {
-    query += ` WHERE fullname ILIKE $${values.length + 1} OR phone ILIKE $${values.length + 1}`;
+    query += ` AND (fullname ILIKE $${values.length + 1} OR phone ILIKE $${values.length + 1})`;
     values.push(`%${fullname}%`);
   }
 
   console.log("Query:", query);
   console.log("Values:", values);
 
-  return db.query(query, values);
+  const result = await db.query(query, values);
+  const rowCount = result.rowCount !== null ? result.rowCount : 0;
+
+  return {
+    rowCount,
+    rows: result.rows
+  };
 };
 
 export const getDetailUser = (id: string): Promise<QueryResult<IUser>> => {

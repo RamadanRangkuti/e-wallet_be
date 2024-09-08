@@ -1,7 +1,7 @@
 import { IDataTransaction, ITopUpData, ITransferData } from "./transaction.model";
 import { IUser } from "./user.model";
 
-interface IPaginationMeta {
+export interface IPaginationMeta {
   totalData?: number;
   totalPage?: number;
   page: number;
